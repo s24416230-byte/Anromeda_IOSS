@@ -1,0 +1,20 @@
+{
+  "project": "Andromeda",
+  "platform": "ios",
+  "github": {
+    "owner": "s24416230-byte",
+    "repo": "Anromeda_IOSS"
+  },
+  "provider": "github",
+  "codemagic": {},
+  "bitrise": {},
+  "ios": {
+    "path": "."
+  },
+  "flutter": {
+    "watch": {}
+  },
+  "reactNative": {},
+  "kmp": {},
+  "mobai": {}
+}

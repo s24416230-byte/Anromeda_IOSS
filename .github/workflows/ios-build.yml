@@ -245,6 +245,7 @@ jobs:
       - name: Build Rust FFI + XCFramework
         env:
           IOS_PATH: ${{ steps.params.outputs.ios_path }}
+          DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
         run: |
           set -e
           cd "$IOS_PATH"
@@ -254,6 +255,9 @@ jobs:
           else
             echo "::warning::build-ios.sh not found at $IOS_PATH"
           fi
+          
+          
+          
 
       # Whatever the previous step could not fill in is named here, instead of
       # surfacing as xcodebuild's "Unable to open base configuration reference".

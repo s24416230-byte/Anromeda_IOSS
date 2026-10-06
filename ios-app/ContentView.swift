@@ -333,7 +333,7 @@ struct ContentView: View {
                 MiscView()
                     .tabItem { Label("Misc", systemImage: "square.grid.2x2.fill") }
                     .tag(AppTab.misc)
-            }
+            
             }
             .tint(theme.accent)
         }

@@ -11,7 +11,6 @@ settings:
     MARKETING_VERSION: "1.3.1"
     CURRENT_PROJECT_VERSION: "1.3.1"
     TARGETED_DEVICE_FAMILY: "1"
-    # AirliftFFI is arm64-only (aws-lc-rs / idevice); drop x86_64 simulator slice.
     EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: ""
@@ -22,6 +21,9 @@ targets:
     platform: iOS
     sources:
       - path: ios-app
+        excludes:
+          - "Assets.xcassets"
+          - "Assets.xcassets/**"
     dependencies:
       - framework: AirliftFFI.xcframework
         embed: false
@@ -30,8 +32,6 @@ targets:
         PRODUCT_NAME: "AirCard-iOS"
         PRODUCT_BUNDLE_IDENTIFIER: com.mak5er.aircard
         INFOPLIST_FILE: ios-app/Info.plist
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
-        # idevice's static lib pulls in C++ symbols (aws-lc); link libc++.
         OTHER_LDFLAGS: "-lc++"
         GENERATE_INFOPLIST_FILE: NO
   AirCard-iOSTests:

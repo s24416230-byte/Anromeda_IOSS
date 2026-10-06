@@ -12,21 +12,7 @@ func logLineColor(_ line: String) -> Color {
     return .secondary
 }
 
-/// Dopamine-style card: pure blur, no outline, no glass.
-private struct DopamineCard: ViewModifier {
-    var cornerRadius: CGFloat = 16
-    func body(content: Content) -> some View {
-        content
-            .background(.ultraThinMaterial,
-                        in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-    }
-}
 
-private extension View {
-    func dopeCard(cornerRadius: CGFloat = 16) -> some View {
-        modifier(DopamineCard(cornerRadius: cornerRadius))
-    }
-}
 
 // MARK: - Share Sheet
 
@@ -333,7 +319,7 @@ struct ContentView: View {
                 MiscView()
                     .tabItem { Label("Misc", systemImage: "square.grid.2x2.fill") }
                     .tag(AppTab.misc)
-            
+
             }
             .tint(theme.accent)
         }

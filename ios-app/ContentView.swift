@@ -61,9 +61,7 @@ struct ThemePickerBar: View {
 // MARK: - Credits Card
 
 struct CreditsCard: View {
-    @EnvironmentObject var vm: AppViewModel
     @State private var showFull = false
-
     var body: some View {
         Button { showFull = true } label: {
             HStack(spacing: 12) {
@@ -103,10 +101,7 @@ struct CreditsSheet: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Label("Lead Developer", systemImage: "crown.fill")
                             .font(.caption.bold().uppercaseSmallCaps())
-                        HStack {
-                            Text("@moondevvv").font(.headline.bold())
-                            Spacer()
-                        }
+                        Text("@moondevvv").font(.headline.bold())
                     }
                     .padding(14).dopeCard(cornerRadius: 14).padding(.horizontal)
 
@@ -124,6 +119,7 @@ struct CreditsSheet: View {
             }
             .navigationTitle("Credits")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") { dismiss() }.bold()
@@ -179,6 +175,7 @@ struct PairingGuideSheet: View {
             }
             .navigationTitle("Pairing Guide")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { dismiss() }.bold() }
             }
@@ -315,8 +312,9 @@ struct ContentView: View {
                 .tag(AppTab.misc)
         }
         .tint(theme.accent)
-        .background(theme.backgroundGradient.ignoresSafeArea())
         .preferredColorScheme(.dark)
+        .onAppear { ThemeBackground.shared.setTheme(theme) }
+        .onChange(of: themeRaw) { _, _ in ThemeBackground.shared.setTheme(theme) }
         .alert("Notice", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }
@@ -364,6 +362,7 @@ struct PairingTab: View {
             .scrollContentBackground(.hidden)
             .navigationTitle("Andromeda")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.hidden, for: .navigationBar)
             .sheet(isPresented: $showFilePicker) {
                 DocumentPickerView(allowedContentTypes: [
                     UTType(filenameExtension: "mobiledevicepairing") ?? .data,
@@ -615,6 +614,7 @@ struct WalletCardsTab: View {
             }
             .scrollContentBackground(.hidden)
             .navigationTitle("Wallet (\(vm.cards.count))")
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button { vm.toggleCardScanning() } label: {
@@ -761,6 +761,7 @@ struct PasscodeThemeTab: View {
             }
             .scrollContentBackground(.hidden)
             .navigationTitle("Passcode")
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
     }
 }

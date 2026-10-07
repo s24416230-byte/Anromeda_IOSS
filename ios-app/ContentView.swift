@@ -12,8 +12,6 @@ func logLineColor(_ line: String) -> Color {
     return .secondary
 }
 
-
-
 // MARK: - Share Sheet
 
 struct ShareSheet: UIViewControllerRepresentable {
@@ -24,7 +22,7 @@ struct ShareSheet: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
-// MARK: - Theme Picker (segmented bar)
+// MARK: - Theme Picker
 
 struct ThemePickerBar: View {
     @AppStorage("andromeda.theme") private var themeRaw: String = AppTheme.emerald.rawValue
@@ -60,7 +58,7 @@ struct ThemePickerBar: View {
     }
 }
 
-// MARK: - Credits Card (on main screen)
+// MARK: - Credits Card
 
 struct CreditsCard: View {
     @EnvironmentObject var vm: AppViewModel
@@ -69,8 +67,7 @@ struct CreditsCard: View {
     var body: some View {
         Button { showFull = true } label: {
             HStack(spacing: 12) {
-                Image(systemName: "sparkles")
-                    .font(.title2)
+                Image(systemName: "sparkles").font(.title2)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Andromeda").font(.headline.bold())
                     Text("@moondevvv · Lead Developer")
@@ -288,41 +285,37 @@ struct ContentView: View {
     private var theme: AppTheme { AppTheme(rawValue: themeRaw) ?? .emerald }
 
     var body: some View {
-        ZStack {
-            theme.backgroundGradient.ignoresSafeArea()
+        TabView(selection: $vm.selectedTab) {
+            PairingTab()
+                .tabItem { Label("Home", systemImage: "house.fill") }
+                .tag(AppTab.pairing)
 
-            TabView(selection: $vm.selectedTab) {
-                PairingTab()
-                    .tabItem { Label("Home", systemImage: "house.fill") }
-                    .tag(AppTab.pairing)
+            WalletCardsTab()
+                .tabItem { Label("Wallet", systemImage: "creditcard.fill") }
+                .tag(AppTab.walletCards)
 
-                WalletCardsTab()
-                    .tabItem { Label("Wallet", systemImage: "creditcard.fill") }
-                    .tag(AppTab.walletCards)
+            PasscodeThemeTab()
+                .tabItem { Label("Passcode", systemImage: "lock.circle.fill") }
+                .tag(AppTab.passcodeThemes)
 
-                PasscodeThemeTab()
-                    .tabItem { Label("Passcode", systemImage: "lock.circle.fill") }
-                    .tag(AppTab.passcodeThemes)
+            TendiesView()
+                .tabItem { Label("Wallpapers", systemImage: "photo.stack.fill") }
+                .tag(AppTab.wallpapers)
 
-                TendiesView()
-                    .tabItem { Label("Wallpapers", systemImage: "photo.stack.fill") }
-                    .tag(AppTab.wallpapers)
+            JITEnablerView()
+                .tabItem { Label("JIT", systemImage: "bolt.fill") }
+                .tag(AppTab.jit)
 
-                JITEnablerView()
-                    .tabItem { Label("JIT", systemImage: "bolt.fill") }
-                    .tag(AppTab.jit)
+            SettingsView()
+                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                .tag(AppTab.settings)
 
-                                SettingsView()
-                    .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-                    .tag(AppTab.settings)
-
-                MiscView()
-                    .tabItem { Label("Misc", systemImage: "square.grid.2x2.fill") }
-                    .tag(AppTab.misc)
-
-            }
-            .tint(theme.accent)
+            MiscView()
+                .tabItem { Label("Misc", systemImage: "square.grid.2x2.fill") }
+                .tag(AppTab.misc)
         }
+        .tint(theme.accent)
+        .background(theme.backgroundGradient.ignoresSafeArea())
         .preferredColorScheme(.dark)
         .alert("Notice", isPresented: Binding(
             get: { vm.errorMessage != nil },
@@ -353,15 +346,11 @@ struct PairingTab: View {
             ScrollView {
                 VStack(spacing: 14) {
                     CreditsCard()
-
                     ThemePickerBar()
-
                     networkCard
                     pairingStatusCard
                     pairingFileCard
-
                     if isIOS27OrNewer { onDevicePairingCard }
-
                     if !vm.log.isEmpty {
                         CompactLogView(title: "Activity Log (\(vm.log.count))",
                                        lines: vm.log,
@@ -370,10 +359,9 @@ struct PairingTab: View {
                     }
                     Spacer(minLength: 40)
                 }
-                .padding(.vertical)
-                .padding(.horizontal)
+                .padding(.vertical).padding(.horizontal)
             }
-            .scrollContentBackground(.hidden).background(Color.clear)
+            .scrollContentBackground(.hidden)
             .navigationTitle("Andromeda")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showFilePicker) {
@@ -509,7 +497,7 @@ struct PairingTab: View {
     }
 }
 
-// MARK: - Wallet Cards Tab (kept, but Dopamine-styled)
+// MARK: - Wallet Cards Tab
 
 struct WalletCardView: View {
     let card: CardItem
@@ -625,7 +613,7 @@ struct WalletCardsTab: View {
                     Spacer(minLength: 40)
                 }.padding(.vertical).padding(.horizontal)
             }
-            .scrollContentBackground(.hidden).background(Color.clear)
+            .scrollContentBackground(.hidden)
             .navigationTitle("Wallet (\(vm.cards.count))")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -771,7 +759,7 @@ struct PasscodeThemeTab: View {
                     Spacer(minLength: 40)
                 }.padding(.vertical).padding(.horizontal)
             }
-            .scrollContentBackground(.hidden).background(Color.clear)
+            .scrollContentBackground(.hidden)
             .navigationTitle("Passcode")
         }
     }

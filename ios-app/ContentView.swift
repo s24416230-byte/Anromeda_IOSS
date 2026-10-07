@@ -58,27 +58,41 @@ struct ThemePickerBar: View {
     }
 }
 
-// MARK: - Credits Card
+// MARK: - Main Menu Button (Dopamine-style)
 
-struct CreditsCard: View {
-    @State private var showFull = false
+struct DopamineMenuButton: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let action: () -> Void
+
     var body: some View {
-        Button { showFull = true } label: {
-            HStack(spacing: 12) {
-                Image(systemName: "sparkles").font(.title2)
+        Button(action: action) {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.system(size: 20, weight: .semibold))
+                    .frame(width: 32)
+
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Andromeda").font(.headline.bold())
-                    Text("@moondevvv · Lead Developer")
-                        .font(.caption).foregroundStyle(.secondary)
+                    Text(title)
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
+
                 Spacer()
-                Image(systemName: "chevron.right").font(.caption)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.secondary)
             }
-            .padding(14)
+            .padding(16)
+            .background(.ultraThinMaterial,
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
-        .dopeCard(cornerRadius: 16)
-        .sheet(isPresented: $showFull) { CreditsSheet() }
     }
 }
 
@@ -103,7 +117,9 @@ struct CreditsSheet: View {
                             .font(.caption.bold().uppercaseSmallCaps())
                         Text("@moondevvv").font(.headline.bold())
                     }
-                    .padding(14).dopeCard(cornerRadius: 14).padding(.horizontal)
+                    .padding(14)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .padding(.horizontal)
 
                     VStack(alignment: .leading, spacing: 12) {
                         techRow(icon: "bolt.shield.fill", title: "Core Exploit", subtitle: "airlift (AirTraffic sandbox escape)")
@@ -112,7 +128,9 @@ struct CreditsSheet: View {
                         Divider()
                         techRow(icon: "bolt.fill", title: "NeoSpring & PosterBoard", subtitle: ".tendies wallpapers")
                     }
-                    .padding(14).dopeCard(cornerRadius: 14).padding(.horizontal)
+                    .padding(14)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .padding(.horizontal)
 
                     Spacer(minLength: 20)
                 }
@@ -187,7 +205,8 @@ struct PairingGuideSheet: View {
             HStack(spacing: 8) { Image(systemName: icon).font(.title3); Text(title).font(.headline.bold()) }
             Text(body).font(.footnote).foregroundStyle(.secondary)
         }
-        .padding(14).dopeCard(cornerRadius: 14)
+        .padding(14)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
@@ -274,47 +293,132 @@ struct DocumentPickerView: UIViewControllerRepresentable {
     }
 }
 
-// MARK: - Root
+// MARK: - Root (Dopamine-style)
 
 struct ContentView: View {
     @EnvironmentObject var vm: AppViewModel
     @AppStorage("andromeda.theme") private var themeRaw: String = AppTheme.emerald.rawValue
     private var theme: AppTheme { AppTheme(rawValue: themeRaw) ?? .emerald }
 
-    var body: some View {
-        TabView(selection: $vm.selectedTab) {
-            PairingTab()
-                .tabItem { Label("Home", systemImage: "house.fill") }
-                .tag(AppTab.pairing)
+    @State private var showCredits = false
+    @State private var activeSheet: ActiveSheet?
 
-            WalletCardsTab()
-                .tabItem { Label("Wallet", systemImage: "creditcard.fill") }
-                .tag(AppTab.walletCards)
-
-            PasscodeThemeTab()
-                .tabItem { Label("Passcode", systemImage: "lock.circle.fill") }
-                .tag(AppTab.passcodeThemes)
-
-            TendiesView()
-                .tabItem { Label("Wallpapers", systemImage: "photo.stack.fill") }
-                .tag(AppTab.wallpapers)
-
-            JITEnablerView()
-                .tabItem { Label("JIT", systemImage: "bolt.fill") }
-                .tag(AppTab.jit)
-
-            SettingsView()
-                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
-                .tag(AppTab.settings)
-
-            MiscView()
-                .tabItem { Label("Misc", systemImage: "square.grid.2x2.fill") }
-                .tag(AppTab.misc)
+    enum ActiveSheet: Identifiable {
+        case wallet, passcode, wallpapers, jit, settings, misc
+        var id: String {
+            switch self {
+            case .wallet: return "wallet"
+            case .passcode: return "passcode"
+            case .wallpapers: return "wallpapers"
+            case .jit: return "jit"
+            case .settings: return "settings"
+            case .misc: return "misc"
+            }
         }
-        .tint(theme.accent)
+    }
+
+    var body: some View {
+        ZStack {
+            // ГРАДИЕНТ — теперь виден, потому что нет TabView
+            theme.backgroundGradient.ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 16) {
+                    // Header
+                    VStack(spacing: 6) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 40))
+                            .foregroundStyle(theme.accent)
+                        Text("Andromeda")
+                            .font(.largeTitle.bold())
+                        Text("@moondevvv")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.top, 20)
+                    .padding(.bottom, 8)
+
+                    // Theme Picker
+                    ThemePickerBar()
+                        .padding(.horizontal)
+
+                    // Main Action Button (Dopamine-style)
+                    Button {
+                        if vm.canFlashCards { vm.flashCards() }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "bolt.fill")
+                                .font(.title3)
+                            Text(vm.canFlashCards ? "Flash Wallet Cards" : "Pair to Start")
+                                .font(.headline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 60)
+                        .foregroundStyle(.white)
+                        .background(theme.accent.opacity(vm.canFlashCards ? 1.0 : 0.4))
+                        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!vm.canFlashCards)
+                    .padding(.horizontal)
+
+                    // Status
+                    if !vm.log.isEmpty {
+                        CompactLogView(title: "Activity Log (\(vm.log.count))",
+                                       lines: Array(vm.log.suffix(5)),
+                                       onClear: { vm.log.removeAll() })
+                            .padding(.horizontal)
+                    }
+
+                    // Menu (Dopamine-style vertical list)
+                    VStack(spacing: 10) {
+                        DopamineMenuButton(icon: "creditcard.fill", title: "Wallet Cards",
+                                           subtitle: "\(vm.cards.count) cards") {
+                            activeSheet = .wallet
+                        }
+                        DopamineMenuButton(icon: "lock.circle.fill", title: "Passcode Themes",
+                                           subtitle: "Custom keypad") {
+                            activeSheet = .passcode
+                        }
+                        DopamineMenuButton(icon: "photo.stack.fill", title: "Wallpapers",
+                                           subtitle: "\(vm.tendieItems.count) .tendies") {
+                            activeSheet = .wallpapers
+                        }
+                        DopamineMenuButton(icon: "bolt.fill", title: "JIT Enabler",
+                                           subtitle: "Just-in-Time") {
+                            activeSheet = .jit
+                        }
+                        DopamineMenuButton(icon: "gearshape.fill", title: "Settings",
+                                           subtitle: "Theme & UI") {
+                            activeSheet = .settings
+                        }
+                        DopamineMenuButton(icon: "square.grid.2x2.fill", title: "Misc",
+                                           subtitle: "Sandbox paths, system") {
+                            activeSheet = .misc
+                        }
+                        DopamineMenuButton(icon: "info.circle.fill", title: "Credits",
+                                           subtitle: "About Andromeda") {
+                            showCredits = true
+                        }
+                    }
+                    .padding(.horizontal)
+
+                    Spacer(minLength: 40)
+                }
+            }
+        }
         .preferredColorScheme(.dark)
-        .onAppear { ThemeBackground.shared.setTheme(theme) }
-        .onChange(of: themeRaw) { _, _ in ThemeBackground.shared.setTheme(theme) }
+        .sheet(isPresented: $showCredits) { CreditsSheet() }
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .wallet: NavigationStack { WalletCardsTab().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .passcode: NavigationStack { PasscodeThemeTab().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .wallpapers: NavigationStack { TendiesView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .jit: NavigationStack { JITEnablerView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .settings: NavigationStack { SettingsView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .misc: NavigationStack { MiscView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            }
+        }
         .alert("Notice", isPresented: Binding(
             get: { vm.errorMessage != nil },
             set: { if !$0 { vm.errorMessage = nil } }
@@ -328,175 +432,7 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Home Tab
-
-struct PairingTab: View {
-    @EnvironmentObject var vm: AppViewModel
-    @State private var showDeleteConfirm = false
-    @State private var showFilePicker = false
-    @State private var showPairingGuide = false
-    private var isIOS27OrNewer: Bool {
-        ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 27
-    }
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 14) {
-                    CreditsCard()
-                    ThemePickerBar()
-                    networkCard
-                    pairingStatusCard
-                    pairingFileCard
-                    if isIOS27OrNewer { onDevicePairingCard }
-                    if !vm.log.isEmpty {
-                        CompactLogView(title: "Activity Log (\(vm.log.count))",
-                                       lines: vm.log,
-                                       onClear: { vm.log.removeAll() })
-                            .padding(14).dopeCard(cornerRadius: 14)
-                    }
-                    Spacer(minLength: 40)
-                }
-                .padding(.vertical).padding(.horizontal)
-            }
-            .scrollContentBackground(.hidden)
-            .navigationTitle("Andromeda")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .sheet(isPresented: $showFilePicker) {
-                DocumentPickerView(allowedContentTypes: [
-                    UTType(filenameExtension: "mobiledevicepairing") ?? .data,
-                    UTType(filenameExtension: "plist") ?? .propertyList,
-                    UTType(filenameExtension: "mobilepair") ?? .data,
-                    .propertyList, .data, .item
-                ]) { url in
-                    _ = vm.importPairingFile(from: url, originalName: url.lastPathComponent)
-                }
-            }
-            .sheet(isPresented: $showPairingGuide) {
-                PairingGuideSheet {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { showFilePicker = true }
-                }
-            }
-            .onAppear {
-                vm.refreshNetworkStatus()
-                vm.refreshPairingFile()
-            }
-        }
-    }
-
-    private var networkCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 12) {
-                Image(systemName: vm.vpnUp ? "checkmark.shield.fill" : "exclamationmark.triangle.fill")
-                    .font(.title3).foregroundStyle(vm.vpnUp ? .green : .orange)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(vm.vpnUp ? "Loopback VPN Active" : "Loopback VPN Not Detected")
-                        .font(.subheadline.bold())
-                    Text(vm.vpnUp ? "RSD tunnel ready." : "Connect LocalDevVPN first.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-            }
-        }
-        .padding(14).dopeCard(cornerRadius: 16)
-    }
-
-    private var pairingStatusCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 10) {
-                Image(systemName: vm.hasPairingFile ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
-                    .foregroundStyle(vm.hasPairingFile ? .green : .orange)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(vm.hasPairingFile ? "Ready to exploit ✅" : "Not Paired")
-                        .font(.subheadline.bold())
-                    if vm.hasPairingFile {
-                        Text("\(vm.pairingFileName) (\(vm.pairingFileSizeString))")
-                            .font(.caption.monospaced()).foregroundStyle(.secondary)
-                    }
-                }
-                Spacer()
-            }
-            if vm.hasPairingFile {
-                Button(role: .destructive) { showDeleteConfirm = true } label: {
-                    Label("Delete Pairing File", systemImage: "trash.fill")
-                        .frame(maxWidth: .infinity).font(.subheadline.bold())
-                }.buttonStyle(.bordered)
-            }
-        }
-        .padding(14).dopeCard(cornerRadius: 16)
-        .confirmationDialog("Delete pairing session?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
-            Button("Delete", role: .destructive) { vm.deletePairingFile() }
-            Button("Cancel", role: .cancel) {}
-        }
-    }
-
-    private var pairingFileCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Button { showFilePicker = true } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "square.and.arrow.down.fill")
-                    Text("Import Pairing File…").font(.headline)
-                    Spacer()
-                    Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
-                }
-            }
-            Button { showPairingGuide = true } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "questionmark.circle")
-                    Text("Where to find pairing file?")
-                }.font(.footnote)
-            }.buttonStyle(.plain)
-
-            if !vm.documentsPlistFiles.isEmpty {
-                Divider()
-                Text("Discovered in Documents:").font(.caption.bold()).foregroundStyle(.secondary)
-                ForEach(vm.documentsPlistFiles, id: \.self) { filename in
-                    HStack {
-                        Image(systemName: "doc.text.fill")
-                        Text(filename).font(.caption.monospaced()).lineLimit(1)
-                        Spacer()
-                        Button("Use") { vm.selectPairingFile(filename: filename) }
-                            .buttonStyle(.bordered).controlSize(.small)
-                    }
-                }
-            }
-        }
-        .padding(14).dopeCard(cornerRadius: 16)
-    }
-
-    @ViewBuilder
-    private var onDevicePairingCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            if vm.pairingPhase == .pairing {
-                HStack(spacing: 8) {
-                    ProgressView().scaleEffect(0.85)
-                    Text(vm.pairingStatus.isEmpty ? "Starting…" : vm.pairingStatus).font(.subheadline)
-                }
-                if let pin = vm.pairingPIN {
-                    Text("ENTER THIS PIN:").font(.caption2.bold()).foregroundStyle(.secondary)
-                    Text(pin).font(.system(size: 36, weight: .black, design: .monospaced))
-                    Button {
-                        if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
-                    } label: {
-                        Label("Open Settings", systemImage: "arrow.up.forward.app").frame(maxWidth: .infinity)
-                    }.buttonStyle(.borderedProminent)
-                }
-                Button(role: .cancel) { vm.cancelPairing() } label: {
-                    Text("Cancel Pairing").frame(maxWidth: .infinity)
-                }.buttonStyle(.bordered)
-            } else {
-                Button { vm.startPairing() } label: {
-                    Label(vm.hasPairingFile ? "Re-Pair This iPhone" : "Pair This iPhone",
-                          systemImage: "antenna.radiowaves.left.and.right")
-                        .font(.headline).frame(maxWidth: .infinity).frame(height: 48)
-                }.buttonStyle(.borderedProminent)
-            }
-        }
-        .padding(14).dopeCard(cornerRadius: 16)
-    }
-}
-
-// MARK: - Wallet Cards Tab
+// MARK: - Wallet Cards Tab (unchanged)
 
 struct WalletCardView: View {
     let card: CardItem
@@ -564,7 +500,8 @@ struct WalletCardView: View {
                 }.buttonStyle(.plain)
             }
         }
-        .padding(14).dopeCard(cornerRadius: 20)
+        .padding(14)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
 
@@ -588,87 +525,86 @@ struct WalletCardsTab: View {
     @State private var cropAccepted = false
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 14) {
-                    if vm.cards.isEmpty { emptyState }
-                    else {
-                        ForEach(vm.cards, id: \.id) { card in
-                            let idx = vm.cards.firstIndex(where: { $0.id == card.id }) ?? 0
-                            WalletCardView(
-                                card: card, cardIndex: idx,
-                                onToggleSelected: { vm.setCardSelected(id: card.id, selected: $0) },
-                                onPickImage: { activePicker = .singleCard(card.id); showSourceDialog = true },
-                                onClearImage: { vm.clearCardImage(for: card.id) },
-                                onDelete: { vm.deleteCard(id: card.id) }
-                            )
-                        }
-                        if !vm.cardFlashLog.isEmpty {
-                            CompactLogView(title: "Flash Log", lines: vm.cardFlashLog,
-                                           onClear: { vm.cardFlashLog.removeAll() })
-                                .padding(14).dopeCard(cornerRadius: 14)
-                        }
+        ScrollView {
+            VStack(spacing: 14) {
+                if vm.cards.isEmpty { emptyState }
+                else {
+                    ForEach(vm.cards, id: \.id) { card in
+                        let idx = vm.cards.firstIndex(where: { $0.id == card.id }) ?? 0
+                        WalletCardView(
+                            card: card, cardIndex: idx,
+                            onToggleSelected: { vm.setCardSelected(id: card.id, selected: $0) },
+                            onPickImage: { activePicker = .singleCard(card.id); showSourceDialog = true },
+                            onClearImage: { vm.clearCardImage(for: card.id) },
+                            onDelete: { vm.deleteCard(id: card.id) }
+                        )
                     }
-                    Spacer(minLength: 40)
-                }.padding(.vertical).padding(.horizontal)
-            }
-            .scrollContentBackground(.hidden)
-            .navigationTitle("Wallet (\(vm.cards.count))")
-            .toolbarBackground(.hidden, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button { vm.toggleCardScanning() } label: {
-                        Label(vm.isScanningCards ? "Stop" : "Scan",
-                              systemImage: vm.isScanningCards ? "stop.circle.fill" : "wave.3.left.circle")
-                            .font(.subheadline.bold())
+                    if !vm.cardFlashLog.isEmpty {
+                        CompactLogView(title: "Flash Log", lines: vm.cardFlashLog,
+                                       onClear: { vm.cardFlashLog.removeAll() })
+                            .padding(14)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button { showAddSheet = true } label: { Label("Add Card", systemImage: "plus") }
-                        if !vm.cards.isEmpty {
-                            Button { vm.selectAllCards(true) } label: { Label("Select All", systemImage: "checkmark.circle") }
-                            Button { vm.selectAllCards(false) } label: { Label("Deselect All", systemImage: "circle") }
-                            Divider()
-                            Button(role: .destructive) { vm.clearAllCards() } label: { Label("Clear All", systemImage: "trash") }
-                        }
-                    } label: { Image(systemName: "ellipsis.circle").font(.title3) }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) { flashButton }
-            }
-            .sheet(isPresented: $showAddSheet) {
-                AddCardSheet(hashText: $newHashText) {
-                    vm.addCardHash(newHashText); newHashText = ""; showAddSheet = false
-                }
-            }
-            .confirmationDialog("Choose Image Source", isPresented: $showSourceDialog, titleVisibility: .visible) {
-                Button { isPhotosPickerPresented = true } label: { Label("Photo Library", systemImage: "photo.on.rectangle") }
-                Button { isDocumentPickerPresented = true } label: { Label("Choose from Files…", systemImage: "folder") }
-                Button("Cancel", role: .cancel) { activePicker = nil }
-            }
-            .sheet(isPresented: $isPhotosPickerPresented, onDismiss: { activePicker = nil }) {
-                if let target = activePicker { CardPhotoPicker { assignImage($0, to: target) } }
-            }
-            .sheet(isPresented: $isDocumentPickerPresented, onDismiss: presentPendingCrop) {
-                DocumentPickerView(allowedContentTypes: [.image, .png, .jpeg, .heic,
-                    UTType(filenameExtension: "webp") ?? .image,
-                    UTType(filenameExtension: "tiff") ?? .image
-                ]) { url in
-                    guard let picker = activePicker else { return }
-                    if let data = try? Data(contentsOf: url),
-                       let image = ImageEngine.safeImageFromData(data, maxDimension: 2560) {
-                        pendingCrop = CropRequest(image: image, target: picker)
-                    } else { pendingLoadError = true }
-                    activePicker = nil
-                }
-            }
-            .sheet(item: $cropRequest, onDismiss: { if !cropAccepted { isDocumentPickerPresented = true } }) { request in
-                CardPhotoCropView(image: request.image) { croppedImage in
-                    cropAccepted = true; assignImage(croppedImage, to: request.target); activePicker = nil
-                }
-            }
-            .alert("Couldn't Load Photo", isPresented: $photoLoadFailed) { Button("OK", role: .cancel) {} }
+                Spacer(minLength: 40)
+            }.padding(.vertical).padding(.horizontal)
         }
+        .scrollContentBackground(.hidden)
+        .navigationTitle("Wallet (\(vm.cards.count))")
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button { vm.toggleCardScanning() } label: {
+                    Label(vm.isScanningCards ? "Stop" : "Scan",
+                          systemImage: vm.isScanningCards ? "stop.circle.fill" : "wave.3.left.circle")
+                        .font(.subheadline.bold())
+                }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button { showAddSheet = true } label: { Label("Add Card", systemImage: "plus") }
+                    if !vm.cards.isEmpty {
+                        Button { vm.selectAllCards(true) } label: { Label("Select All", systemImage: "checkmark.circle") }
+                        Button { vm.selectAllCards(false) } label: { Label("Deselect All", systemImage: "circle") }
+                        Divider()
+                        Button(role: .destructive) { vm.clearAllCards() } label: { Label("Clear All", systemImage: "trash") }
+                    }
+                } label: { Image(systemName: "ellipsis.circle").font(.title3) }
+            }
+            ToolbarItem(placement: .navigationBarTrailing) { flashButton }
+        }
+        .sheet(isPresented: $showAddSheet) {
+            AddCardSheet(hashText: $newHashText) {
+                vm.addCardHash(newHashText); newHashText = ""; showAddSheet = false
+            }
+        }
+        .confirmationDialog("Choose Image Source", isPresented: $showSourceDialog, titleVisibility: .visible) {
+            Button { isPhotosPickerPresented = true } label: { Label("Photo Library", systemImage: "photo.on.rectangle") }
+            Button { isDocumentPickerPresented = true } label: { Label("Choose from Files…", systemImage: "folder") }
+            Button("Cancel", role: .cancel) { activePicker = nil }
+        }
+        .sheet(isPresented: $isPhotosPickerPresented, onDismiss: { activePicker = nil }) {
+            if let target = activePicker { CardPhotoPicker { assignImage($0, to: target) } }
+        }
+        .sheet(isPresented: $isDocumentPickerPresented, onDismiss: presentPendingCrop) {
+            DocumentPickerView(allowedContentTypes: [.image, .png, .jpeg, .heic,
+                UTType(filenameExtension: "webp") ?? .image,
+                UTType(filenameExtension: "tiff") ?? .image
+            ]) { url in
+                guard let picker = activePicker else { return }
+                if let data = try? Data(contentsOf: url),
+                   let image = ImageEngine.safeImageFromData(data, maxDimension: 2560) {
+                    pendingCrop = CropRequest(image: image, target: picker)
+                } else { pendingLoadError = true }
+                activePicker = nil
+            }
+        }
+        .sheet(item: $cropRequest, onDismiss: { if !cropAccepted { isDocumentPickerPresented = true } }) { request in
+            CardPhotoCropView(image: request.image) { croppedImage in
+                cropAccepted = true; assignImage(croppedImage, to: request.target); activePicker = nil
+            }
+        }
+        .alert("Couldn't Load Photo", isPresented: $photoLoadFailed) { Button("OK", role: .cancel) {} }
     }
 
     private func assignImage(_ image: UIImage, to target: ActiveCardPicker) {
@@ -703,7 +639,8 @@ struct WalletCardsTab: View {
                 Text("2. Double-click Side button (Apple Pay).")
                 Text("3. Tap your card.")
             }.font(.subheadline).foregroundStyle(.secondary)
-                .padding(16).dopeCard(cornerRadius: 14)
+                .padding(16)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }.padding(.top, 40)
     }
 }
@@ -741,28 +678,27 @@ struct AddCardSheet: View {
 struct PasscodeThemeTab: View {
     @EnvironmentObject var vm: AppViewModel
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 14) {
-                    Picker("Mode", selection: $vm.passcodeMode) {
-                        ForEach(CreatorMode.allCases) { m in Text(m.rawValue).tag(m) }
-                    }.pickerStyle(.segmented)
+        ScrollView {
+            VStack(spacing: 14) {
+                Picker("Mode", selection: $vm.passcodeMode) {
+                    ForEach(CreatorMode.allCases) { m in Text(m.rawValue).tag(m) }
+                }.pickerStyle(.segmented)
 
-                    if vm.passcodeMode == .applyTheme { ApplyThemeSection() }
-                    else { ThemeCreatorSection() }
+                if vm.passcodeMode == .applyTheme { ApplyThemeSection() }
+                else { ThemeCreatorSection() }
 
-                    if !vm.passthmFlashLog.isEmpty {
-                        CompactLogView(title: "Flash Log", lines: vm.passthmFlashLog,
-                                       onClear: { vm.passthmFlashLog.removeAll() })
-                            .padding(14).dopeCard(cornerRadius: 14)
-                    }
-                    Spacer(minLength: 40)
-                }.padding(.vertical).padding(.horizontal)
-            }
-            .scrollContentBackground(.hidden)
-            .navigationTitle("Passcode")
-            .toolbarBackground(.hidden, for: .navigationBar)
+                if !vm.passthmFlashLog.isEmpty {
+                    CompactLogView(title: "Flash Log", lines: vm.passthmFlashLog,
+                                   onClear: { vm.passthmFlashLog.removeAll() })
+                        .padding(14)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                Spacer(minLength: 40)
+            }.padding(.vertical).padding(.horizontal)
         }
+        .scrollContentBackground(.hidden)
+        .navigationTitle("Passcode")
+        .toolbarBackground(.hidden, for: .navigationBar)
     }
 }
 
@@ -802,7 +738,8 @@ struct ApplyThemeSection: View {
                 }.buttonStyle(.bordered)
             }
         }
-        .padding(14).dopeCard(cornerRadius: 16)
+        .padding(14)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .sheet(isPresented: $showDocumentPicker) {
             DocumentPickerView(allowedContentTypes: [UTType(filenameExtension: "passthm") ?? .archive, .zip, .archive]) {
                 vm.loadPassthm(url: $0)
@@ -876,7 +813,8 @@ struct ThemeCreatorSection: View {
                 }.buttonStyle(.bordered)
             }
         }
-        .padding(14).dopeCard(cornerRadius: 16)
+        .padding(14)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .confirmationDialog("Poster Source", isPresented: $showPosterSourceDialog, titleVisibility: .visible) {
             Button("Photo Library") { isPosterPhotosPickerPresented = true }
             Button("Files…") { isPosterDocumentPickerPresented = true }

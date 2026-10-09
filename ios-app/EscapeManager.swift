@@ -33,6 +33,14 @@ enum EscapeManager {
         )
     }
 
+    // MARK: - Escape
+
+    @discardableResult
+    static func escapeToPath(_ path: String, write: Bool) -> Bool {
+        let result = EscapeEngine.escapeToPath(path, write: write)
+        return result == .success
+    }
+
     // MARK: - Preferences
 
     static func writeSpringBoardKey(_ key: String, value: Any) -> Bool {
@@ -69,11 +77,12 @@ enum EscapeManager {
         )
     }
 
-        // MARK: - Logs
+    // MARK: - Logs
 
     static func log(_ message: String) {
         LogManager.shared()?.logString(message)
     }
+
     static func lines() -> [String] {
         return LogManager.shared()?.lines ?? []
     }

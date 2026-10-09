@@ -3,7 +3,7 @@ import SwiftUI
 struct SpringBoardView: View {
     @State private var carrierName: String = "Moon"
     @State private var logs: [String] = []
-    @State private var showLogs = false
+    @State private var showLogs = true
 
     var body: some View {
         ScrollView {
@@ -29,13 +29,15 @@ struct SpringBoardView: View {
         .onAppear { refreshLogs() }
     }
 
+    // MARK: - Header
+
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
                 Image(systemName: "gearshape.2.fill").font(.title2)
                 Text("SpringBoard").font(.title2.bold())
             }
-            Text("Прямая запись в com.apple.springboard.plist через EscapeEngine. MobileGestalt пока недоступен.")
+            Text("Через EscapeEngine. MobileGestalt пока недоступен.")
                 .font(.subheadline).foregroundStyle(.secondary)
 
             let p = EscapeManager.probe()
@@ -50,6 +52,8 @@ struct SpringBoardView: View {
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
+
+    // MARK: - Carrier
 
     private var carrierCard: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -66,22 +70,42 @@ struct SpringBoardView: View {
                 .buttonStyle(.borderedProminent)
             }
 
-            Text("Запишет CarrierName в SpringBoard plist. После применения — respring.")
+            Text("Запишет CarrierName в SpringBoard plist через PlistWriter. После применения — respring.")
                 .font(.caption2).foregroundStyle(.secondary)
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
+    // MARK: - Quick actions
+
     private var quickActionsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Быстрые действия").font(.caption.bold().uppercaseSmallCaps()).foregroundStyle(.secondary)
 
-            actionButton("Respring", icon: "bolt.fill") {
-                EscapeManager.respring()
-                EscapeManager.log("Respring triggered")
+            actionButton("Write CarrierName via CFPreferences", icon: "doc.badge.plus") {
+                let ok = EscapeManager.writeSpringBoardKey("CarrierName", value: carrierName)
+                EscapeManager.log("CFPrefs CarrierName: \(ok ? "OK" : "FAIL")")
+                let ok2 = EscapeManager.writeSpringBoardKey("CarrierName2", value: carrierName)
+                EscapeManager.log("CFPrefs CarrierName2: \(ok2 ? "OK" : "FAIL")")
                 refreshLogs()
             }
+
+            actionButton("Write SpringBoard marker via CFPreferences", icon: "flag.fill") {
+                let ok = EscapeManager.writeSpringBoardKey("AndromedaMarker", value: true)
+                EscapeManager.log("CFPrefs AndromedaMarker: \(ok ? "OK" : "FAIL")")
+                refreshLogs()
+            }
+
+            actionButton("Respring (manual reboot required)", icon: "bolt.fill") {
+                EscapeManager.log("iOS 27 requires manual reboot:")
+                EscapeManager.log("  1. Lock iPhone")
+                EscapeManager.log("  2. Hold Side + Volume Up")
+                EscapeManager.log("  3. Slide to power off")
+                EscapeManager.log("  4. Power back on")
+                refreshLogs()
+            }
+
             actionButton("Прочитать SpringBoard keys", icon: "doc.text") {
                 if let keys = EscapeManager.readSpringBoardKeys() {
                     EscapeManager.log("SB keys: \(keys.count)")
@@ -93,6 +117,7 @@ struct SpringBoardView: View {
                 }
                 refreshLogs()
             }
+
             actionButton("Очистить логи", icon: "trash") {
                 EscapeManager.clearLogs()
                 refreshLogs()
@@ -101,6 +126,8 @@ struct SpringBoardView: View {
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
+
+    // MARK: - Logs
 
     private var logsCard: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -116,18 +143,21 @@ struct SpringBoardView: View {
                 }
                 .padding(8)
             }
-            .frame(maxHeight: 220)
+            .frame(maxHeight: 260)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
+    // MARK: - Helpers
+
     private func actionButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: icon).frame(width: 20)
                 Text(title).font(.subheadline.weight(.medium))
+                    .multilineTextAlignment(.leading)
                 Spacer()
                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.secondary)
             }
@@ -137,17 +167,12 @@ struct SpringBoardView: View {
     }
 
     private func applyCarrier() {
-        _ = EscapeEngine.escapeToPath(EscapeManager.springBoardPath, write: true)
+        _ = EscapeManager.escapeToPath(EscapeManager.springBoardPath, write: true)
         var dict = EscapeManager.readSpringBoardPlist() ?? [:]
         dict["CarrierName"] = carrierName
         dict["CarrierName2"] = carrierName
         let ok = EscapeManager.writeSpringBoardPlist(dict)
         EscapeManager.log("carrier \(carrierName): \(ok ? "OK" : "FAIL")")
-        if ok {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                EscapeManager.respring()
-            }
-        }
         refreshLogs()
     }
 

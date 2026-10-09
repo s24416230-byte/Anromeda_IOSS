@@ -58,7 +58,7 @@ struct ThemePickerBar: View {
     }
 }
 
-// MARK: - Main Menu Button (Dopamine-style)
+// MARK: - Main Menu Button
 
 struct DopamineMenuButton: View {
     let icon: String
@@ -123,6 +123,8 @@ struct CreditsSheet: View {
 
                     VStack(alignment: .leading, spacing: 12) {
                         techRow(icon: "bolt.shield.fill", title: "Core Exploit", subtitle: "airlift (AirTraffic sandbox escape)")
+                        Divider()
+                        techRow(icon: "gearshape.2.fill", title: "SpringBoard", subtitle: "EscapeEngine (sandbox_extension_issue_file)")
                         Divider()
                         techRow(icon: "lock.shield.fill", title: "Passcode Themes", subtitle: ".passthm standard")
                         Divider()
@@ -304,7 +306,7 @@ struct ContentView: View {
     @State private var activeSheet: ActiveSheet?
 
     enum ActiveSheet: Identifiable {
-        case wallet, passcode, wallpapers, jit, settings, misc
+        case wallet, passcode, wallpapers, jit, settings, misc, springboard
         var id: String {
             switch self {
             case .wallet: return "wallet"
@@ -313,13 +315,13 @@ struct ContentView: View {
             case .jit: return "jit"
             case .settings: return "settings"
             case .misc: return "misc"
+            case .springboard: return "springboard"
             }
         }
     }
 
     var body: some View {
         ZStack {
-            // ГРАДИЕНТ — теперь виден, потому что нет TabView
             theme.backgroundGradient.ignoresSafeArea()
 
             ScrollView {
@@ -338,17 +340,14 @@ struct ContentView: View {
                     .padding(.top, 20)
                     .padding(.bottom, 8)
 
-                    // Theme Picker
-                    ThemePickerBar()
-                        .padding(.horizontal)
+                    ThemePickerBar().padding(.horizontal)
 
-                    // Main Action Button (Dopamine-style)
+                    // Main Action
                     Button {
                         if vm.canFlashCards { vm.flashCards() }
                     } label: {
                         HStack(spacing: 10) {
-                            Image(systemName: "bolt.fill")
-                                .font(.title3)
+                            Image(systemName: "bolt.fill").font(.title3)
                             Text(vm.canFlashCards ? "Flash Wallet Cards" : "Pair to Start")
                                 .font(.headline)
                         }
@@ -362,7 +361,6 @@ struct ContentView: View {
                     .disabled(!vm.canFlashCards)
                     .padding(.horizontal)
 
-                    // Status
                     if !vm.log.isEmpty {
                         CompactLogView(title: "Activity Log (\(vm.log.count))",
                                        lines: Array(vm.log.suffix(5)),
@@ -370,11 +368,15 @@ struct ContentView: View {
                             .padding(.horizontal)
                     }
 
-                    // Menu (Dopamine-style vertical list)
+                    // Menu
                     VStack(spacing: 10) {
                         DopamineMenuButton(icon: "creditcard.fill", title: "Wallet Cards",
                                            subtitle: "\(vm.cards.count) cards") {
                             activeSheet = .wallet
+                        }
+                        DopamineMenuButton(icon: "gearshape.2.fill", title: "SpringBoard",
+                                           subtitle: "Carrier, respring, keys") {
+                            activeSheet = .springboard
                         }
                         DopamineMenuButton(icon: "lock.circle.fill", title: "Passcode Themes",
                                            subtitle: "Custom keypad") {
@@ -411,12 +413,27 @@ struct ContentView: View {
         .sheet(isPresented: $showCredits) { CreditsSheet() }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
-            case .wallet: NavigationStack { WalletCardsTab().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
-            case .passcode: NavigationStack { PasscodeThemeTab().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
-            case .wallpapers: NavigationStack { TendiesView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
-            case .jit: NavigationStack { JITEnablerView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
-            case .settings: NavigationStack { SettingsView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
-            case .misc: NavigationStack { MiscView().toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .wallet:
+                NavigationStack { WalletCardsTab()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .springboard:
+                NavigationStack { SpringBoardView()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .passcode:
+                NavigationStack { PasscodeThemeTab()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .wallpapers:
+                NavigationStack { TendiesView()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .jit:
+                NavigationStack { JITEnablerView()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .settings:
+                NavigationStack { SettingsView()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .misc:
+                NavigationStack { MiscView()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
             }
         }
         .alert("Notice", isPresented: Binding(
@@ -432,7 +449,7 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Wallet Cards Tab (unchanged)
+// MARK: - Wallet Cards
 
 struct WalletCardView: View {
     let card: CardItem

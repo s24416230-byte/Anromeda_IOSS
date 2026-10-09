@@ -43,6 +43,10 @@
     NSLog(@"[femboyplist] %@", line);
 }
 
+- (void)logString:(NSString *)message {
+    [self log:@"%@", message];
+}
+
 - (void)clear {
     @synchronized(self) {
         [_lines removeAllObjects];

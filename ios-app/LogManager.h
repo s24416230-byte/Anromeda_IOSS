@@ -9,5 +9,6 @@
 
 - (void)log:(NSString *)format, ...;
 - (void)clear;
+- (void)logString:(NSString *)message;
 
 @end

@@ -72,9 +72,8 @@ enum EscapeManager {
         // MARK: - Logs
 
     static func log(_ message: String) {
-        LogManager.shared()?.log("%@", message)
+        LogManager.shared()?.logString(message)
     }
-
     static func lines() -> [String] {
         return LogManager.shared()?.lines ?? []
     }

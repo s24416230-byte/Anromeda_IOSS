@@ -31,11 +31,11 @@
     va_start(args, format);
     NSString *msg = [[NSString alloc] initWithFormat:format arguments:args];
     va_end(args);
-    
+
     NSDateFormatter *f = [[NSDateFormatter alloc] init];
     f.dateFormat = @"HH:mm:ss";
     NSString *line = [NSString stringWithFormat:@"[%@] %@", [f stringFromDate:[NSDate date]], msg];
-    
+
     @synchronized(self) {
         [_lines addObject:line];
         if (_lines.count > 500) [_lines removeObjectAtIndex:0];

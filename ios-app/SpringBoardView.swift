@@ -137,7 +137,7 @@ struct SpringBoardView: View {
     }
 
     private func applyCarrier() {
-        _ = EscapeEngine.escape(toPath: EscapeManager.springBoardPath, write: true)
+        _ = EscapeEngine.escapeToPath(EscapeManager.springBoardPath, write: true)
         var dict = EscapeManager.readSpringBoardPlist() ?? [:]
         dict["CarrierName"] = carrierName
         dict["CarrierName2"] = carrierName

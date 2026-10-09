@@ -51,7 +51,19 @@ enum EscapeManager {
         return EscapeEngine.readPrefApp("com.apple.springboard") as? [String: Any]
     }
 
-    // MARK: - SpringBoard plist (прямая запись в файл)
+    static func writeAccessibilityKey(_ key: String, value: Any) -> Bool {
+        return EscapeEngine.writePref(key, value: value, appID: "com.apple.Accessibility")
+    }
+
+    static func writeCarrierKey(_ key: String, value: Any) -> Bool {
+        return EscapeEngine.writePref(key, value: value, appID: "com.apple.carrier")
+    }
+
+    static func writeOperatorKey(_ key: String, value: Any) -> Bool {
+        return EscapeEngine.writePref(key, value: value, appID: "com.apple.operator")
+    }
+
+    // MARK: - SpringBoard plist
 
     static let springBoardPath = "/var/mobile/Library/Preferences/com.apple.springboard.plist"
 
@@ -65,6 +77,23 @@ enum EscapeManager {
 
     static func setSpringBoardKey(_ key: String, value: Any) -> Bool {
         return PlistWriter.setKey(key, value: value, inFile: springBoardPath)
+    }
+
+    // MARK: - PosterBoard
+
+    static func posterBoardContainer() -> String? {
+        return EscapeEngine.posterBoardContainer()
+    }
+
+    static func installedTendies() -> [String] {
+        guard let dir = EscapeEngine.collectionsDir() else { return [] }
+        let url = URL(fileURLWithPath: dir)
+        return (try? FileManager.default.contentsOfDirectory(atPath: url.path)) ?? []
+    }
+
+    static func invalidatePosterBoard() {
+        guard let dir = EscapeEngine.collectionsDir() else { return }
+        try? FileManager.default.removeItem(atPath: dir + "/.cache")
     }
 
     // MARK: - Respring

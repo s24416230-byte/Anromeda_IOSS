@@ -72,18 +72,11 @@ struct DopamineMenuButton: View {
                 Image(systemName: icon)
                     .font(.system(size: 20, weight: .semibold))
                     .frame(width: 32)
-
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(.headline.weight(.semibold))
-                        .foregroundStyle(.primary)
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text(title).font(.headline.weight(.semibold)).foregroundStyle(.primary)
+                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
                 }
-
                 Spacer()
-
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundStyle(.secondary)
@@ -306,16 +299,17 @@ struct ContentView: View {
     @State private var activeSheet: ActiveSheet?
 
     enum ActiveSheet: Identifiable {
-        case wallet, passcode, wallpapers, jit, settings, misc, springboard
+        case wallet, springboard, advanced, passcode, wallpapers, jit, settings, misc
         var id: String {
             switch self {
             case .wallet: return "wallet"
+            case .springboard: return "springboard"
+            case .advanced: return "advanced"
             case .passcode: return "passcode"
             case .wallpapers: return "wallpapers"
             case .jit: return "jit"
             case .settings: return "settings"
             case .misc: return "misc"
-            case .springboard: return "springboard"
             }
         }
     }
@@ -326,23 +320,17 @@ struct ContentView: View {
 
             ScrollView {
                 VStack(spacing: 16) {
-                    // Header
                     VStack(spacing: 6) {
                         Image(systemName: "sparkles")
                             .font(.system(size: 40))
                             .foregroundStyle(theme.accent)
-                        Text("Andromeda")
-                            .font(.largeTitle.bold())
-                        Text("@moondevvv")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text("Andromeda").font(.largeTitle.bold())
+                        Text("@moondevvv").font(.caption).foregroundStyle(.secondary)
                     }
-                    .padding(.top, 20)
-                    .padding(.bottom, 8)
+                    .padding(.top, 20).padding(.bottom, 8)
 
                     ThemePickerBar().padding(.horizontal)
 
-                    // Main Action
                     Button {
                         if vm.canFlashCards { vm.flashCards() }
                     } label: {
@@ -351,8 +339,7 @@ struct ContentView: View {
                             Text(vm.canFlashCards ? "Flash Wallet Cards" : "Pair to Start")
                                 .font(.headline)
                         }
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 60)
+                        .frame(maxWidth: .infinity).frame(height: 60)
                         .foregroundStyle(.white)
                         .background(theme.accent.opacity(vm.canFlashCards ? 1.0 : 0.4))
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -368,40 +355,25 @@ struct ContentView: View {
                             .padding(.horizontal)
                     }
 
-                    // Menu
                     VStack(spacing: 10) {
                         DopamineMenuButton(icon: "creditcard.fill", title: "Wallet Cards",
-                                           subtitle: "\(vm.cards.count) cards") {
-                            activeSheet = .wallet
-                        }
+                                           subtitle: "\(vm.cards.count) cards") { activeSheet = .wallet }
                         DopamineMenuButton(icon: "gearshape.2.fill", title: "SpringBoard",
-                                           subtitle: "Carrier, respring, keys") {
-                            activeSheet = .springboard
-                        }
+                                           subtitle: "Carrier, respring, keys") { activeSheet = .springboard }
+                        DopamineMenuButton(icon: "wand.and.stars", title: "Advanced",
+                                           subtitle: "PosterBoard, Accessibility, icons") { activeSheet = .advanced }
                         DopamineMenuButton(icon: "lock.circle.fill", title: "Passcode Themes",
-                                           subtitle: "Custom keypad") {
-                            activeSheet = .passcode
-                        }
+                                           subtitle: "Custom keypad") { activeSheet = .passcode }
                         DopamineMenuButton(icon: "photo.stack.fill", title: "Wallpapers",
-                                           subtitle: "\(vm.tendieItems.count) .tendies") {
-                            activeSheet = .wallpapers
-                        }
+                                           subtitle: "\(vm.tendieItems.count) .tendies") { activeSheet = .wallpapers }
                         DopamineMenuButton(icon: "bolt.fill", title: "JIT Enabler",
-                                           subtitle: "Just-in-Time") {
-                            activeSheet = .jit
-                        }
+                                           subtitle: "Just-in-Time") { activeSheet = .jit }
                         DopamineMenuButton(icon: "gearshape.fill", title: "Settings",
-                                           subtitle: "Theme & UI") {
-                            activeSheet = .settings
-                        }
+                                           subtitle: "Theme & UI") { activeSheet = .settings }
                         DopamineMenuButton(icon: "square.grid.2x2.fill", title: "Misc",
-                                           subtitle: "Sandbox paths, system") {
-                            activeSheet = .misc
-                        }
+                                           subtitle: "Sandbox paths, system") { activeSheet = .misc }
                         DopamineMenuButton(icon: "info.circle.fill", title: "Credits",
-                                           subtitle: "About Andromeda") {
-                            showCredits = true
-                        }
+                                           subtitle: "About Andromeda") { showCredits = true }
                     }
                     .padding(.horizontal)
 
@@ -418,6 +390,9 @@ struct ContentView: View {
                     .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
             case .springboard:
                 NavigationStack { SpringBoardView()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .advanced:
+                NavigationStack { AdvancedView()
                     .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
             case .passcode:
                 NavigationStack { PasscodeThemeTab()

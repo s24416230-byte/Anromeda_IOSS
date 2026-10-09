@@ -29,8 +29,6 @@ struct SpringBoardView: View {
         .onAppear { refreshLogs() }
     }
 
-    // MARK: - Header
-
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 10) {
@@ -53,8 +51,6 @@ struct SpringBoardView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    // MARK: - Carrier
-
     private var carrierCard: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Carrier Name").font(.caption.bold().uppercaseSmallCaps()).foregroundStyle(.secondary)
@@ -64,20 +60,16 @@ struct SpringBoardView: View {
                     .textFieldStyle(.plain)
                     .padding(.horizontal, 10).padding(.vertical, 8)
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
-                Button("Применить") {
-                    applyCarrier()
-                }
-                .buttonStyle(.borderedProminent)
+                Button("Применить") { applyCarrier() }
+                    .buttonStyle(.borderedProminent)
             }
 
-            Text("Запишет CarrierName в SpringBoard plist через PlistWriter. После применения — respring.")
+            Text("Запишет CarrierName через CFPreferences. Перезагрузка iPhone обязательна.")
                 .font(.caption2).foregroundStyle(.secondary)
         }
         .padding(14)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
-
-    // MARK: - Quick actions
 
     private var quickActionsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -88,12 +80,6 @@ struct SpringBoardView: View {
                 EscapeManager.log("CFPrefs CarrierName: \(ok ? "OK" : "FAIL")")
                 let ok2 = EscapeManager.writeSpringBoardKey("CarrierName2", value: carrierName)
                 EscapeManager.log("CFPrefs CarrierName2: \(ok2 ? "OK" : "FAIL")")
-                refreshLogs()
-            }
-
-            actionButton("Write SpringBoard marker via CFPreferences", icon: "flag.fill") {
-                let ok = EscapeManager.writeSpringBoardKey("AndromedaMarker", value: true)
-                EscapeManager.log("CFPrefs AndromedaMarker: \(ok ? "OK" : "FAIL")")
                 refreshLogs()
             }
 
@@ -127,8 +113,6 @@ struct SpringBoardView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    // MARK: - Logs
-
     private var logsCard: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Логи").font(.caption.bold().uppercaseSmallCaps()).foregroundStyle(.secondary)
@@ -150,12 +134,10 @@ struct SpringBoardView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    // MARK: - Helpers
-
     private func actionButton(_ title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                Image(systemName: icon).frame(width: 20)
+                Image(systemName: icon).frame(width: 22)
                 Text(title).font(.subheadline.weight(.medium))
                     .multilineTextAlignment(.leading)
                 Spacer()
@@ -167,11 +149,7 @@ struct SpringBoardView: View {
     }
 
     private func applyCarrier() {
-        _ = EscapeManager.escapeToPath(EscapeManager.springBoardPath, write: true)
-        var dict = EscapeManager.readSpringBoardPlist() ?? [:]
-        dict["CarrierName"] = carrierName
-        dict["CarrierName2"] = carrierName
-        let ok = EscapeManager.writeSpringBoardPlist(dict)
+        let ok = EscapeManager.writeSpringBoardKey("CarrierName", value: carrierName)
         EscapeManager.log("carrier \(carrierName): \(ok ? "OK" : "FAIL")")
         refreshLogs()
     }

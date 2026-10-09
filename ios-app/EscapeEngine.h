@@ -3,7 +3,7 @@
 typedef NS_ENUM(NSInteger, EscapeResult) { EscapeResultSuccess=0, EscapeResultTokenBlocked, EscapeResultPathDenied, EscapeResultSymbolMissing };
 @interface EscapeEngine : NSObject
 + (NSDictionary *)probeSurface;
-+ (EscapeResult)escapeToPath:(NSString*)path write:(BOOL)write;
++ (EscapeResult)escapeToPath:(NSString*)path write:(BOOL)write NS_SWIFT_NAME(escapeToPath(_:write:));
 + (NSArray<NSString*>*)enumerateSystemGroupContainers;
 + (NSString*)posterBoardContainer;
 + (NSString*)collectionsDir;

@@ -37,7 +37,7 @@ struct AdvancedView: View {
                 Image(systemName: "wand.and.stars").font(.title2)
                 Text("Advanced Tweaks").font(.title2.bold())
             }
-            Text("SpringBoard, PosterBoard, Accessibility через EscapeEngine.")
+            Text("SpringBoard, PosterBoard, Accessibility через EscapeEngine (AnyUser).")
                 .font(.subheadline).foregroundStyle(.secondary)
         }
         .padding(14)
@@ -49,12 +49,14 @@ struct AdvancedView: View {
             Text("SpringBoard").font(.caption.bold().uppercaseSmallCaps()).foregroundStyle(.secondary)
 
             actionButton("Скрыть иконку Калькулятора", icon: "eye.slash") {
-                let ok = EscapeManager.writeSpringBoardKey("SBIconVisibility", value: ["com.apple.calculator": false])
+                let ok = EscapeManager.writeSpringBoardKey("SBIconVisibilityDefaultVisible",
+                                                           value: ["com.apple.calculator": false])
                 EscapeManager.log("SBIconVisibility: \(ok ? "OK" : "FAIL")")
                 refreshLogs()
             }
             actionButton("Показать иконку Калькулятора", icon: "eye") {
-                let ok = EscapeManager.writeSpringBoardKey("SBIconVisibility", value: ["com.apple.calculator": true])
+                let ok = EscapeManager.writeSpringBoardKey("SBIconVisibilityDefaultVisible",
+                                                           value: ["com.apple.calculator": true])
                 EscapeManager.log("SBIconVisibility: \(ok ? "OK" : "FAIL")")
                 refreshLogs()
             }
@@ -131,14 +133,14 @@ struct AdvancedView: View {
 
     private var carrierCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Carrier (альтернативные пути)").font(.caption.bold().uppercaseSmallCaps()).foregroundStyle(.secondary)
+            Text("Carrier (альтернативные домены)").font(.caption.bold().uppercaseSmallCaps()).foregroundStyle(.secondary)
 
-            actionButton("Записать в com.apple.carrier.plist", icon: "antenna.radiowaves.left.and.right") {
+            actionButton("com.apple.carrier → CarrierName = Moon", icon: "antenna.radiowaves.left.and.right") {
                 let ok = EscapeManager.writeCarrierKey("CarrierName", value: "Moon")
                 EscapeManager.log("carrier.plist: \(ok ? "OK" : "FAIL")")
                 refreshLogs()
             }
-            actionButton("Записать в com.apple.operator.plist", icon: "wifi") {
+            actionButton("com.apple.operator → OperatorName = Moon", icon: "wifi") {
                 let ok = EscapeManager.writeOperatorKey("OperatorName", value: "Moon")
                 EscapeManager.log("operator.plist: \(ok ? "OK" : "FAIL")")
                 refreshLogs()

@@ -1,8 +1,6 @@
 import Foundation
 import UIKit
 
-/// Swift-обёртка над Objective-C EscapeEngine / PlistWriter.
-/// Все методы безопасны: возвращают Bool, не крашат приложение.
 enum EscapeManager {
 
     // MARK: - Probe
@@ -41,26 +39,26 @@ enum EscapeManager {
         return result == .success
     }
 
-    // MARK: - Preferences
+    // MARK: - Preferences (AnyUser — для системных доменов)
 
     static func writeSpringBoardKey(_ key: String, value: Any) -> Bool {
-        return EscapeEngine.writePref(key, value: value, appID: "com.apple.springboard")
+        return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.springboard")
+    }
+
+    static func writeAccessibilityKey(_ key: String, value: Any) -> Bool {
+        return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.Accessibility")
+    }
+
+    static func writeCarrierKey(_ key: String, value: Any) -> Bool {
+        return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.carrier")
+    }
+
+    static func writeOperatorKey(_ key: String, value: Any) -> Bool {
+        return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.operator")
     }
 
     static func readSpringBoardKeys() -> [String: Any]? {
         return EscapeEngine.readPrefApp("com.apple.springboard") as? [String: Any]
-    }
-
-    static func writeAccessibilityKey(_ key: String, value: Any) -> Bool {
-        return EscapeEngine.writePref(key, value: value, appID: "com.apple.Accessibility")
-    }
-
-    static func writeCarrierKey(_ key: String, value: Any) -> Bool {
-        return EscapeEngine.writePref(key, value: value, appID: "com.apple.carrier")
-    }
-
-    static func writeOperatorKey(_ key: String, value: Any) -> Bool {
-        return EscapeEngine.writePref(key, value: value, appID: "com.apple.operator")
     }
 
     // MARK: - SpringBoard plist

@@ -40,7 +40,7 @@
         [_lines addObject:line];
         if (_lines.count > 500) [_lines removeObjectAtIndex:0];
     }
-    NSLog(@"[femboyplist] %@", line);
+    NSLog(@"[andromeda] %@", line);
 }
 
 - (void)logString:(NSString *)message {

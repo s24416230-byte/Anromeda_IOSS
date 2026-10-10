@@ -35,8 +35,6 @@ enum EscapeManager {
         return result == .success
     }
 
-    // MARK: - SpringBoard
-
     static func writeSpringBoardKey(_ key: String, value: Any) -> Bool {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.springboard")
     }
@@ -47,12 +45,6 @@ enum EscapeManager {
         return EscapeEngine.readPrefApp("com.apple.springboard") as? [String: Any]
     }
 
-    static func deleteSpringBoardKey(_ key: String) -> Bool {
-        return EscapeEngine.deletePref(key, appID: "com.apple.springboard")
-    }
-
-    // MARK: - Carrier
-
     static func writeCarrierKey(_ key: String, value: Any) -> Bool {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.carrier")
     }
@@ -61,19 +53,13 @@ enum EscapeManager {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.operator")
     }
 
-    // MARK: - Accessibility
-
     static func writeAccessibilityKey(_ key: String, value: Any) -> Bool {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.Accessibility")
     }
 
-    // MARK: - Универсальный преф для любого appID
-
     static func writePref(_ key: String, value: Any, appID: String) -> Bool {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: appID)
     }
-
-    // MARK: - SpringBoard plist (прямая запись)
 
     static let springBoardPath = "/var/mobile/Library/Preferences/com.apple.springboard.plist"
 
@@ -84,8 +70,6 @@ enum EscapeManager {
     static func writeSpringBoardPlist(_ dict: [String: Any]) -> Bool {
         return PlistWriter.write(dict, toPath: springBoardPath)
     }
-
-    // MARK: - PosterBoard
 
     static func posterBoardContainer() -> String? {
         return EscapeEngine.posterBoardContainer()
@@ -102,8 +86,6 @@ enum EscapeManager {
         try? FileManager.default.removeItem(atPath: dir + "/.cache")
     }
 
-    // MARK: - Respring (не работает на iOS 27)
-
     static func respring() {
         CFNotificationCenterPostNotification(
             CFNotificationCenterGetDarwinNotifyCenter(),
@@ -111,8 +93,6 @@ enum EscapeManager {
             nil, nil, true
         )
     }
-
-    // MARK: - Logs
 
     static func log(_ message: String) {
         LogManager.shared()?.logString(message)

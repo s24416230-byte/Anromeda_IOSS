@@ -43,8 +43,7 @@ struct ThemePickerBar: View {
                                 .foregroundStyle(current == theme ? .primary : .secondary)
                         }
                         .padding(.horizontal, 14).padding(.vertical, 9)
-                        .background(.ultraThinMaterial,
-                                    in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .stroke(current == theme ? theme.accent.opacity(0.8) : Color.clear, lineWidth: 1)
@@ -69,21 +68,16 @@ struct DopamineMenuButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 14) {
-                Image(systemName: icon)
-                    .font(.system(size: 20, weight: .semibold))
-                    .frame(width: 32)
+                Image(systemName: icon).font(.system(size: 20, weight: .semibold)).frame(width: 32)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.headline.weight(.semibold)).foregroundStyle(.primary)
                     Text(subtitle).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
+                Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
             }
             .padding(16)
-            .background(.ultraThinMaterial,
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -288,7 +282,7 @@ struct DocumentPickerView: UIViewControllerRepresentable {
     }
 }
 
-// MARK: - Root (Dopamine-style)
+// MARK: - Root
 
 struct ContentView: View {
     @EnvironmentObject var vm: AppViewModel
@@ -299,12 +293,13 @@ struct ContentView: View {
     @State private var activeSheet: ActiveSheet?
 
     enum ActiveSheet: Identifiable {
-        case wallet, springboard, advanced, passcode, wallpapers, jit, settings, misc
+        case wallet, springboard, advanced, gestalt, passcode, wallpapers, jit, settings, misc
         var id: String {
             switch self {
             case .wallet: return "wallet"
             case .springboard: return "springboard"
             case .advanced: return "advanced"
+            case .gestalt: return "gestalt"
             case .passcode: return "passcode"
             case .wallpapers: return "wallpapers"
             case .jit: return "jit"
@@ -321,9 +316,7 @@ struct ContentView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     VStack(spacing: 6) {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 40))
-                            .foregroundStyle(theme.accent)
+                        Image(systemName: "sparkles").font(.system(size: 40)).foregroundStyle(theme.accent)
                         Text("Andromeda").font(.largeTitle.bold())
                         Text("@moondevvv").font(.caption).foregroundStyle(.secondary)
                     }
@@ -336,8 +329,7 @@ struct ContentView: View {
                     } label: {
                         HStack(spacing: 10) {
                             Image(systemName: "bolt.fill").font(.title3)
-                            Text(vm.canFlashCards ? "Flash Wallet Cards" : "Pair to Start")
-                                .font(.headline)
+                            Text(vm.canFlashCards ? "Flash Wallet Cards" : "Pair to Start").font(.headline)
                         }
                         .frame(maxWidth: .infinity).frame(height: 60)
                         .foregroundStyle(.white)
@@ -362,6 +354,8 @@ struct ContentView: View {
                                            subtitle: "Carrier, respring, keys") { activeSheet = .springboard }
                         DopamineMenuButton(icon: "wand.and.stars", title: "Advanced",
                                            subtitle: "PosterBoard, Accessibility, icons") { activeSheet = .advanced }
+                        DopamineMenuButton(icon: "cpu.fill", title: "MobileGestalt",
+                                           subtitle: "Экспериментально") { activeSheet = .gestalt }
                         DopamineMenuButton(icon: "lock.circle.fill", title: "Passcode Themes",
                                            subtitle: "Custom keypad") { activeSheet = .passcode }
                         DopamineMenuButton(icon: "photo.stack.fill", title: "Wallpapers",
@@ -393,6 +387,9 @@ struct ContentView: View {
                     .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
             case .advanced:
                 NavigationStack { AdvancedView()
+                    .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
+            case .gestalt:
+                NavigationStack { MobileGestaltView()
                     .toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Done") { activeSheet = nil }.bold() } } }
             case .passcode:
                 NavigationStack { PasscodeThemeTab()

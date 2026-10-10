@@ -42,14 +42,8 @@ static void load_symbols(void) {
             struct stat st;
             r[[NSString stringWithFormat:@"stat_%@", p]] = @(stat(p.UTF8String, &st) == 0);
         }
-
-        if (g_issue) {
-            int64_t t = g_issue("/var/mobile/Library/Preferences", 0x3, getpid());
-            r[@"token_issued"] = @(t != -1);
-            if (t != -1 && g_consume) {
-                r[@"token_consumed"] = @(g_consume(t) == 0);
-            }
-        }
+        r[@"token_issued"]   = @NO;
+        r[@"token_consumed"] = @NO;
         return r;
     } @catch (NSException *e) {
         return @{@"error": e.reason ?: @"unknown"};
@@ -153,6 +147,42 @@ static void load_symbols(void) {
         return d;
     } @catch (NSException *e) {
         return nil;
+    }
+}
+
++ (NSDictionary *)readAnyUserPrefApp:(NSString *)appID {
+    @try {
+        CFArrayRef keys = CFPreferencesCopyKeyList((__bridge CFStringRef)appID,
+                                                   kCFPreferencesAnyUser,
+                                                   kCFPreferencesAnyHost);
+        NSMutableDictionary *d = [NSMutableDictionary dictionary];
+        for (CFIndex i = 0; i < CFArrayGetCount(keys); i++) {
+            CFStringRef k = CFArrayGetValueAtIndex(keys, i);
+            CFPropertyListRef v = CFPreferencesCopyValue(k,
+                                                         (__bridge CFStringRef)appID,
+                                                         kCFPreferencesAnyUser,
+                                                         kCFPreferencesAnyHost);
+            d[(__bridge NSString *)k] = (__bridge id)v;
+        }
+        if (keys) CFRelease(keys);
+        return d;
+    } @catch (NSException *e) {
+        return nil;
+    }
+}
+
++ (BOOL)deletePref:(NSString *)key appID:(NSString *)appID {
+    @try {
+        CFPreferencesSetValue((__bridge CFStringRef)key, NULL,
+                              (__bridge CFStringRef)appID,
+                              kCFPreferencesAnyUser,
+                              kCFPreferencesAnyHost);
+        CFPreferencesSynchronize((__bridge CFStringRef)appID,
+                                 kCFPreferencesAnyUser,
+                                 kCFPreferencesAnyHost);
+        return YES;
+    } @catch (NSException *e) {
+        return NO;
     }
 }
 

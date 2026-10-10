@@ -30,6 +30,12 @@ typedef NS_ENUM(NSInteger, EscapeResult) {
 + (BOOL)writeAnyUserPref:(NSString *)key value:(id)value appID:(NSString *)appID
     NS_SWIFT_NAME(writeAnyUserPref(_:value:appID:));
 
++ (NSDictionary *)readAnyUserPrefApp:(NSString *)appID
+    NS_SWIFT_NAME(readAnyUserPrefApp(_:));
+
++ (BOOL)deletePref:(NSString *)key appID:(NSString *)appID
+    NS_SWIFT_NAME(deletePref(_:appID:));
+
 + (int)spawnBin:(NSString *)path args:(NSArray *)args
     NS_SWIFT_NAME(spawnBin(_:args:));
 

@@ -3,8 +3,6 @@ import UIKit
 
 enum EscapeManager {
 
-    // MARK: - Probe
-
     struct ProbeResult {
         let extensionIssue: Bool
         let extensionConsume: Bool
@@ -31,23 +29,29 @@ enum EscapeManager {
         )
     }
 
-    // MARK: - Escape
-
     @discardableResult
     static func escapeToPath(_ path: String, write: Bool) -> Bool {
         let result = EscapeEngine.escapeToPath(path, write: write)
         return result == .success
     }
 
-    // MARK: - Preferences (AnyUser — для системных доменов)
+    // MARK: - SpringBoard
 
     static func writeSpringBoardKey(_ key: String, value: Any) -> Bool {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.springboard")
     }
 
-    static func writeAccessibilityKey(_ key: String, value: Any) -> Bool {
-        return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.Accessibility")
+    static func readSpringBoardKeys() -> [String: Any]? {
+        if let anyUser = EscapeEngine.readAnyUserPrefApp("com.apple.springboard") as? [String: Any],
+           !anyUser.isEmpty { return anyUser }
+        return EscapeEngine.readPrefApp("com.apple.springboard") as? [String: Any]
     }
+
+    static func deleteSpringBoardKey(_ key: String) -> Bool {
+        return EscapeEngine.deletePref(key, appID: "com.apple.springboard")
+    }
+
+    // MARK: - Carrier
 
     static func writeCarrierKey(_ key: String, value: Any) -> Bool {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.carrier")
@@ -57,11 +61,19 @@ enum EscapeManager {
         return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.operator")
     }
 
-    static func readSpringBoardKeys() -> [String: Any]? {
-        return EscapeEngine.readPrefApp("com.apple.springboard") as? [String: Any]
+    // MARK: - Accessibility
+
+    static func writeAccessibilityKey(_ key: String, value: Any) -> Bool {
+        return EscapeEngine.writeAnyUserPref(key, value: value, appID: "com.apple.Accessibility")
     }
 
-    // MARK: - SpringBoard plist
+    // MARK: - Универсальный преф для любого appID
+
+    static func writePref(_ key: String, value: Any, appID: String) -> Bool {
+        return EscapeEngine.writeAnyUserPref(key, value: value, appID: appID)
+    }
+
+    // MARK: - SpringBoard plist (прямая запись)
 
     static let springBoardPath = "/var/mobile/Library/Preferences/com.apple.springboard.plist"
 
@@ -71,10 +83,6 @@ enum EscapeManager {
 
     static func writeSpringBoardPlist(_ dict: [String: Any]) -> Bool {
         return PlistWriter.write(dict, toPath: springBoardPath)
-    }
-
-    static func setSpringBoardKey(_ key: String, value: Any) -> Bool {
-        return PlistWriter.setKey(key, value: value, inFile: springBoardPath)
     }
 
     // MARK: - PosterBoard
@@ -94,7 +102,7 @@ enum EscapeManager {
         try? FileManager.default.removeItem(atPath: dir + "/.cache")
     }
 
-    // MARK: - Respring
+    // MARK: - Respring (не работает на iOS 27)
 
     static func respring() {
         CFNotificationCenterPostNotification(

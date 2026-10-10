@@ -123,7 +123,6 @@ static int64_t run_bad_query(char *path, bool create, char *group_identifier, bo
     int64_t handle = consume_extension(token);
     free(token);
     free(part);
-    xpc_release(identifier);
     query_free(query);
     dlclose(mgr);
     return handle;
